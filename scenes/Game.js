@@ -6,6 +6,7 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
+    // Cargar assets
     this.load.tilemapTiledJSON("Proyecto", "./assets/ProyectoMapaJuego.json");
     this.load.tilemapTiledJSON("MapaGenerado", "./assets/MapaGenerado.json");
     this.load.image("espacio", "./assets/A&Mu-Game-atlas-esenario.3.png");
@@ -19,6 +20,8 @@ export default class Game extends Phaser.Scene {
 
   create() {
     // Crear el mapa inicial
+    this.ultimoEstado = "";
+    this.maps = 0;
     this.mapaActual = this.make.tilemap({ key: "Proyecto" });
     const tiles = this.mapaActual.addTilesetImage("escenario", "espacio");
 
@@ -28,145 +31,179 @@ export default class Game extends Phaser.Scene {
 
     // Crear el robot
     this.robot = this.physics.add.sprite(628, 428, "robot").setScale(0.2);
+    this.robot.setDepth(1);
+    this.robot.setSize(this.robot.width * 0.5, this.robot.height * 0.5);
     this.physics.add.collider(this.robot, this.LayerArriba);
 
-    // Configurar la cámara
-    this.cameras.main.setBounds(0, 0, this.mapaActual.widthInPixels, this.mapaActual.heightInPixels);
-    this.cameras.main.startFollow(this.robot);
+    // Crear objetos destruibles y no destruibles
+    this.objetosNoDestruibles = this.physics.add.staticGroup();
+    this.objetosDestruibles = this.physics.add.group();
+    this.crearObjetos();
 
-    // Renderizar gráficos de debug para las colisiones si es necesario
-    const debugGraphics = this.add.graphics().setAlpha(0.75);
-    this.LayerArriba.renderDebug(debugGraphics, {
-      tileColor: null,
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255),
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255),
-    });
+    // Configurar colisiones
+    this.physics.add.collider(this.robot, this.objetosNoDestruibles);
+    this.physics.add.collider(this.robot, this.objetosDestruibles, this.destruirObjeto, null, this);
+
+    // Configurar la cámara
+    this.mycam = this.cameras.main;
+    this.mycam.startFollow(this.robot);
+
+    // Renderizar gráficos de depuración de colisiones si es necesario
+    this.renderizarGraficosDepuracion(this.LayerArriba);
 
     // Configurar animaciones del robot
-    this.configureRobotAnimations();
+    this.configurarAnimacionesRobot();
 
-    // Detectar el evento de click para reanudar el contexto de audio si está suspendido
-    this.input.once('pointerdown', () => {
-      if (this.sound.context.state === 'suspended') {
+    // Manejar la reanudación del contexto de audio al hacer clic en un punto
+    this.input.once("pointerdown", () => {
+      if (this.sound.context.state === "suspended") {
         this.sound.context.resume();
       }
     });
 
-    // Generar el siguiente mapa y mover el actual hacia abajo
-    this.generateNextMap();
+    // Generar el siguiente mapa
+    this.generarSiguienteMapa();
   }
 
   update() {
-    const speed = 200;
+    const velocidad = 500;
 
-    // Movimiento del robot con las teclas
+    // Manejar el movimiento del robot
     if (this.cursors.left.isDown) {
-        this.robot.setVelocity(-speed, 0);
-        this.robot.anims.play("robot-run-side(right)", true);
+      this.moverRobot(-velocidad, 0, "right", "robot-run-side(right)");
     } else if (this.cursors.right.isDown) {
-        this.robot.setVelocity(speed, 0);
-        this.robot.anims.play("robot-run-side(left)", true);
+      this.moverRobot(velocidad, 0, "left", "robot-run-side(left)");
     } else if (this.cursors.up.isDown) {
-        this.robot.setVelocity(0, -speed);
-        this.robot.anims.play("robot-run-up", true);
+      this.moverRobot(0, -velocidad, "up", "robot-run-up");
     } else if (this.cursors.down.isDown) {
-        this.robot.setVelocity(0, speed);
-        this.robot.anims.play("robot-run-below", true);
+      this.moverRobot(0, velocidad, "below", "robot-run-below");
     } else {
-        this.robot.setVelocity(0, 0);
-        const currentAnim = this.robot.anims.currentAnim;
-        if (currentAnim && currentAnim.key) {
-            const direction = currentAnim.key.split("-")[2];
-            this.robot.anims.play(`robot-idle-${direction}`, true);
-        } else {
-            this.robot.anims.play("robot-idle-below", true);
-        }
+      this.robot.anims.play(`robot-idle-${this.ultimoEstado}`);
+      this.robot.setVelocity(0, 0);
     }
 
     // Verificar colisiones con la capa de arriba del mapa actual
     this.physics.world.collide(this.robot, this.LayerArriba);
-    
-    // Verificar si el robot está cerca del borde inferior del mapa actual
-    const bottomOfMap = this.LayerAbajo.tileToWorldXY(0, this.mapaActual.heightInTiles).y;
-    if (this.robot.y > bottomOfMap - this.cameras.main.height / 2) {
-        this.generateNextMap();
+
+    // Comprobar si el robot está cerca del borde inferior del mapa actual
+    if (this.robot.y > this.LayerAbajo.height - 400) {
+      this.generarSiguienteMapa();
     }
   }
 
-  configureRobotAnimations() {
-    this.anims.create({
-      key: "robot-idle-left",
-      frames: [{ key: "robot", frame: ".A&Mu-robot-run-left-00.png" }],
-      
+  moverRobot(velocidadX, velocidadY, estado, animacion) {
+    this.robot.setVelocity(velocidadX, velocidadY);
+    this.robot.anims.play(animacion, true);
+    this.ultimoEstado = estado;
+  }
+
+  configurarAnimacionesRobot() {
+    // Definir las animaciones del robot
+    const animaciones = [
+      { key: "robot-idle-left", frame: ".A&Mu-robot-run-left-00.png" },
+      { key: "robot-idle-right", frame: ".A&Mu-robot-run-right-00.png" },
+      { key: "robot-idle-below", frame: ".A&Mu-robot-run-below-00.png" },
+      { key: "robot-idle-up", frame: ".A&Mu-robot-run-up-00.png" },
+    ];
+
+    animaciones.forEach(animacion => {
+      this.anims.create({
+        key: animacion.key,
+        frames: [{ key: "robot", frame: animacion.frame }],
+      });
     });
 
     this.anims.create({
-      key: "robot-idle-right",
-      frames: [{ key: "robot", frame: ".A&Mu-robot-run-right-00.png" }],
-     
-    });  
-    this.anims.create({
       key: "robot-run-side(left)",
-      frames: this.anims.generateFrameNames("robot", { start: 0, end: 2, prefix: ".A&Mu-robot-run-left-0", suffix: ".png" }),
-      frameRate: 8,
-      
+      frames: this.anims.generateFrameNames("robot", {
+        start: 0,
+        end: 2,
+        prefix: ".A&Mu-robot-run-left-0",
+        suffix: ".png",
+      }),
+      frameRate: 6,
+      repeat: -1,
     });
 
     this.anims.create({
       key: "robot-run-side(right)",
-      frames: this.anims.generateFrameNames("robot", { start: 0, end: 2, prefix: ".A&Mu-robot-run-right-0", suffix: ".png" }),
-      frameRate: 8,
-      
+      frames: this.anims.generateFrameNames("robot", {
+        start: 0,
+        end: 2,
+        prefix: ".A&Mu-robot-run-right-0",
+        suffix: ".png",
+      }),
+      frameRate: 6,
+      repeat: -1,
     });
 
     this.anims.create({
       key: "robot-run-below",
       frames: [{ key: "robot", frame: ".A&Mu-robot-run-below-01.png" }],
-     
+      frameRate: 4,
+      repeat: -1,
     });
 
     this.anims.create({
       key: "robot-run-up",
       frames: [{ key: "robot", frame: ".A&Mu-robot-run-up-00.png" }],
-      
-    });
-
-
-
-    this.anims.create({
-      key: "robot-idle-below",
-      frames: [{ key: "robot", frame: ".A&Mu-robot-run-below-00.png" }],
-      
-    });
-
-    this.anims.create({
-      key: "robot-idle-up",
-      frames: [{ key: "robot", frame: ".A&Mu-robot-run-up-00.png" }],
-     
+      frameRate: 4,
+      repeat: -1,
     });
   }
 
-  generateNextMap() {
-    // Generar el siguiente mapa y mover el actual hacia abajo
-    this.mapaActual = this.make.tilemap({ key: "MapaGenerado" });
-    const tiles = this.mapaActual.addTilesetImage("escenario", "espacio");
-
-    // Crear nuevas capas y configurar colisiones
-    const newLayerAbajo = this.mapaActual.createLayer("piso", tiles, 0, this.mapaActual.heightInPixels);
-    const newLayerArriba = this.mapaActual.createLayer("paredes", tiles, 0, this.mapaActual.heightInPixels);
-    newLayerArriba.setCollisionByProperty({ coliders: true });
-    this.physics.add.collider(this.robot, newLayerArriba); // Agregar colisión con el robot
-
-    // Actualizar las capas actuales
-    this.LayerAbajo = newLayerAbajo;
-    this.LayerArriba = newLayerArriba;
-
-    // Renderizar gráficos de debug para las colisiones si es necesario
+  renderizarGraficosDepuracion(layer) {
     const debugGraphics = this.add.graphics().setAlpha(0.75);
-    this.LayerArriba.renderDebug(debugGraphics, {
+    layer.renderDebug(debugGraphics, {
       tileColor: null,
       collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255),
       faceColor: new Phaser.Display.Color(40, 39, 37, 255),
     });
+  }
+
+  generarSiguienteMapa() {
+    // Generar el siguiente mapa y mover el actual hacia abajo
+    this.maps++;
+    this.mapaActual = this.make.tilemap({ key: "MapaGenerado" });
+    const tiles = this.mapaActual.addTilesetImage("escenario", "espacio");
+
+    const nuevaLayerAbajo = this.mapaActual.createLayer(
+      "piso",
+      tiles,
+      0,
+      this.maps * this.mapaActual.heightInPixels
+    );
+    const nuevaLayerArriba = this.mapaActual.createLayer(
+      "paredes",
+      tiles,
+      0,
+      this.maps * this.mapaActual.heightInPixels
+    );
+
+    nuevaLayerArriba.setCollisionByProperty({ coliders: true });
+    this.physics.add.collider(this.robot, nuevaLayerArriba);
+
+    // Actualizar las capas actuales
+    this.LayerAbajo = nuevaLayerAbajo;
+    this.LayerArriba = nuevaLayerArriba;
+
+    // Renderizar gráficos de depuración para colisiones
+    this.renderizarGraficosDepuracion(this.LayerArriba);
+  }
+
+  crearObjetos() {
+    // Crear objetos no destruibles
+    const objetoNoDestruible = this.objetosNoDestruibles.create(300, 300, "objeto-no");
+    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.5, objetoNoDestruible.height * );
+
+    // Crear objetos destruibles
+    const objetoDestruible = this.objetosDestruibles.create(500, 500, "objeto-si");
+    objetoDestruible.setSize(objetoDestruible.width * 0.5, objetoDestruible.height);
+  }
+
+  destruirObjeto(robot, objeto) {
+    // Implementar la lógica de destrucción de objetos
+    objeto.destroy();
+  }
 }
-}
+
