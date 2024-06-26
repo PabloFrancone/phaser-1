@@ -194,7 +194,7 @@ export default class Game extends Phaser.Scene {
   crearObjetos() {
     // Crear objetos no destruibles
     const objetoNoDestruible = this.objetosNoDestruibles.create(300, 300, "objeto-no");
-    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.5, objetoNoDestruible.height * );
+    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.5, objetoNoDestruible.height );
 
     // Crear objetos destruibles
     const objetoDestruible = this.objetosDestruibles.create(500, 500, "objeto-si");
