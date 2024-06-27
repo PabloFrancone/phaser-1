@@ -67,7 +67,7 @@ export default class Game extends Phaser.Scene {
 
   update() {
     const velocidad = 500;
-
+ 
     // Manejar el movimiento del robot
     if (this.cursors.left.isDown) {
       this.moverRobot(-velocidad, 0, "right", "robot-run-side(right)");
@@ -193,12 +193,12 @@ export default class Game extends Phaser.Scene {
 
   crearObjetos() {
     // Crear objetos no destruibles
-    const objetoNoDestruible = this.objetosNoDestruibles.create(300, 300, "objeto-no");
-    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.5, objetoNoDestruible.height );
+    const objetoNoDestruible = this.objetosNoDestruibles.create(700, 20, "objeto-no");
+    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.5, objetoNoDestruible.height * 0.9 );
 
     // Crear objetos destruibles
-    const objetoDestruible = this.objetosDestruibles.create(500, 500, "objeto-si");
-    objetoDestruible.setSize(objetoDestruible.width * 0.5, objetoDestruible.height);
+    const objetoDestruible = this.objetosDestruibles.create(40, 400, "objeto-si") .setScale();
+    objetoDestruible.setSize(objetoDestruible.width * 0.7, objetoDestruible.height * 0.8);
   }
 
   destruirObjeto(robot, objeto) {

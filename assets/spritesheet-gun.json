@@ -1,0 +1,135 @@
+{
+	"frames": {
+		"A&Mu-gun-robot-below-00.png": {
+			"frame": {
+				"x": 1,
+				"y": 1,
+				"w": 1000,
+				"h": 1000
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 1000,
+				"h": 1000
+			},
+			"sourceSize": {
+				"w": 1000,
+				"h": 1000
+			}
+		},
+		"A&Mu-gun-robot-reft-00.png.png": {
+			"frame": {
+				"x": 1003,
+				"y": 1,
+				"w": 1000,
+				"h": 1000
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 1000,
+				"h": 1000
+			},
+			"sourceSize": {
+				"w": 1000,
+				"h": 1000
+			}
+		},
+		"A&Mu-gun-robot-reft-01.png": {
+			"frame": {
+				"x": 1,
+				"y": 1003,
+				"w": 1000,
+				"h": 1000
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 1000,
+				"h": 1000
+			},
+			"sourceSize": {
+				"w": 1000,
+				"h": 1000
+			}
+		},
+		"A&Mu-gun-robot-right-00.png.png": {
+			"frame": {
+				"x": 1003,
+				"y": 1003,
+				"w": 1000,
+				"h": 1000
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 1000,
+				"h": 1000
+			},
+			"sourceSize": {
+				"w": 1000,
+				"h": 1000
+			}
+		},
+		"A&Mu-gun-robot-right-01.png.png": {
+			"frame": {
+				"x": 2005,
+				"y": 1,
+				"w": 1000,
+				"h": 1000
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 1000,
+				"h": 1000
+			},
+			"sourceSize": {
+				"w": 1000,
+				"h": 1000
+			}
+		},
+		"A&Mu-gun-robot-up-01.png.png": {
+			"frame": {
+				"x": 2005,
+				"y": 1003,
+				"w": 1000,
+				"h": 1000
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 1000,
+				"h": 1000
+			},
+			"sourceSize": {
+				"w": 1000,
+				"h": 1000
+			}
+		}
+	},
+	"meta": {
+		"app": "http://www.codeandweb.com/texturepacker",
+		"version": "1.0",
+		"image": "spritesheet.png",
+		"format": "RGBA8888",
+		"size": {
+			"w": 3006,
+			"h": 2004
+		},
+		"scale": "1"
+	}
+}
