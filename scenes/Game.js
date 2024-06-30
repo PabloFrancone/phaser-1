@@ -122,7 +122,6 @@ export default class Game extends Phaser.Scene {
         suffix: ".png",
       }),
       frameRate: 6,
-      repeat: -1,
     });
 
     this.anims.create({
@@ -134,7 +133,6 @@ export default class Game extends Phaser.Scene {
         suffix: ".png",
       }),
       frameRate: 6,
-      repeat: -1,
     });
 
     this.anims.create({
@@ -193,8 +191,8 @@ export default class Game extends Phaser.Scene {
 
   crearObjetos() {
     // Crear objetos no destruibles
-    const objetoNoDestruible = this.objetosNoDestruibles.create(700, 20, "objeto-no");
-    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.5, objetoNoDestruible.height * 0.9 );
+    const objetoNoDestruible = this.objetosNoDestruibles.create(720, 600, "objeto-no");
+    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.1, objetoNoDestruible.height * 0.1 ).setScale(0.2);
 
     // Crear objetos destruibles
     const objetoDestruible = this.objetosDestruibles.create(40, 400, "objeto-si") .setScale();
