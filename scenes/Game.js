@@ -1,5 +1,3 @@
-// URL to explain PHASER scene: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/scene/
-
 export default class Game extends Phaser.Scene {
   constructor() {
     super("Game");
@@ -32,13 +30,15 @@ export default class Game extends Phaser.Scene {
     // Crear el robot
     this.robot = this.physics.add.sprite(628, 428, "robot").setScale(0.2);
     this.robot.setDepth(1);
-    this.robot.setSize(this.robot.width * 0.5, this.robot.height * 0.5);
+    this.robot.setSize(this.robot.width * 0.5, this.robot.height * 0.7);
     this.physics.add.collider(this.robot, this.LayerArriba);
 
-    // Crear objetos destruibles y no destruibles
+    // Crear grupos para objetos
     this.objetosNoDestruibles = this.physics.add.staticGroup();
     this.objetosDestruibles = this.physics.add.group();
-    this.crearObjetos();
+
+    // Generar objetos aleatorios al iniciar
+    this.generarObjetosAleatorios();
 
     // Configurar colisiones
     this.physics.add.collider(this.robot, this.objetosNoDestruibles);
@@ -67,7 +67,7 @@ export default class Game extends Phaser.Scene {
 
   update() {
     const velocidad = 500;
- 
+
     // Manejar el movimiento del robot
     if (this.cursors.left.isDown) {
       this.moverRobot(-velocidad, 0, "right", "robot-run-side(right)");
@@ -187,16 +187,36 @@ export default class Game extends Phaser.Scene {
 
     // Renderizar gráficos de depuración para colisiones
     this.renderizarGraficosDepuracion(this.LayerArriba);
+
+    // Generar nuevos objetos aleatorios
+    this.generarObjetosAleatorios();
   }
 
-  crearObjetos() {
-    // Crear objetos no destruibles
-    const objetoNoDestruible = this.objetosNoDestruibles.create(720, 600, "objeto-no");
-    objetoNoDestruible.setSize(objetoNoDestruible.width * 0.1, objetoNoDestruible.height * 0.1 ).setScale(0.2);
+  generarObjetosAleatorios() {
+    // Eliminar objetos existentes
+    
 
-    // Crear objetos destruibles
-    const objetoDestruible = this.objetosDestruibles.create(40, 400, "objeto-si") .setScale();
-    objetoDestruible.setSize(objetoDestruible.width * 0.7, objetoDestruible.height * 0.8);
+    // Generar nuevos objetos
+    const cantidadObjetos = 10; // Cantidad de objetos a generar
+    const spawnAreaWidth = this.LayerAbajo.width; // Ancho del área de generación
+    const offsetY = this.maps * this.LayerAbajo.height; // Desplazamiento en el eje Y según el mapa
+
+    for (let i = 0; i < cantidadObjetos; i++) {
+      // Generar posición aleatoria dentro del área de juego
+      const x = Phaser.Math.Between(200, spawnAreaWidth - 200);
+      const y = Phaser.Math.Between(300, this.LayerAbajo.height - 300) + offsetY;
+
+      // Elegir aleatoriamente entre objeto destruible o no destruible
+      if (Phaser.Math.Between(0, 1) === 0) {
+        // Objeto no destruible
+        const objetoNoDestruible = this.objetosNoDestruibles.create(x, y, "objeto-no");
+        objetoNoDestruible.setSize(objetoNoDestruible.width * 0.1, objetoNoDestruible.height * 0.21).setScale(0.2).setDepth(2);
+      } else {
+        // Objeto destruible
+        const objetoDestruible = this.objetosDestruibles.create(x, y, "objeto-si").setScale();
+        objetoDestruible.setSize(objetoDestruible.width * 0.7, objetoDestruible.height * 0.8).setScale(0.2).setDepth(2);
+      }
+    }
   }
 
   destruirObjeto(robot, objeto) {
@@ -204,4 +224,3 @@ export default class Game extends Phaser.Scene {
     objeto.destroy();
   }
 }
-
