@@ -26,8 +26,12 @@ export default class Game extends Phaser.Scene {
 
     // Configurar la cámara
     this.mycam = this.cameras.main;
-    this.mycam.startFollow(this.robot);
-    this.mycam.centerOn(this.robot.x, this.robot.y);
+    this.mycam.startFollow(this.robot) ;
+
+    // Crear el robot
+    
+    this.robot.setSize(this.robot.width * 0.2, this.robot.height * 0.3);   
+    this.physics.add.collider(this.robot, this.LayerArriba);
 
     // Configurar animaciones del robot
     this.configurarAnimacionesRobot();
@@ -232,7 +236,7 @@ export default class Game extends Phaser.Scene {
 
     this.anims.create({
       key: "robot-run-below",
-      frames: [{ key: "robot", frame: ".A&Mu-robot-run-below-01.png" }],
+      frames: [{ key: "robot", frame: ".A&Mu-robot-run-below-00.png" }],
       frameRate: 4,
       repeat: -1,
     });
@@ -246,12 +250,12 @@ export default class Game extends Phaser.Scene {
   }
 
   renderizarGraficosDepuracion(layer) {
-    // const debugGraphics = this.add.graphics().setAlpha(0.75);
-    // layer.renderDebug(debugGraphics, {
-    //   tileColor: null,
-    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255),
-    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255),
-    // });
+    const debugGraphics = this.add.graphics().setAlpha(0.75);
+    layer.renderDebug(debugGraphics, {
+      tileColor: null,
+      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255),
+      faceColor: new Phaser.Display.Color(40, 39, 37, 255),
+    });
   }
 
   destruirObjeto(robot, objeto) {
