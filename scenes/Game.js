@@ -12,11 +12,15 @@ export default class Game extends Phaser.Scene {
     this.load.image("objeto-no", "./assets/A&Mu-objets-not-breakable.png");
     this.load.image("objeto-si", "./assets/A&Mu-objets-breakable.png");
     this.load.atlas("robot", "./assets/spritesheet.png", "./assets/spritesheet.json");
-
+    this.load.audio('gameMusic', ['./assets/audio/game_music.mp3', './assets/audio/game_music.opus']);
     this.cursors = this.input.keyboard.createCursorKeys();
   }
 
   create() {
+
+    this.gameMusic = this.sound.add('gameMusic', { loop: true });
+    this.gameMusic.volume = 0.5;
+    this.gameMusic.play();
     // Configurar variables de estado inicial
     this.ultimoEstado = "";
     this.maps = 0;
